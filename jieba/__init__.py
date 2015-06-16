@@ -310,12 +310,12 @@ class Tokenizer(object):
             if len(w) > 2:
                 for i in xrange(len(w) - 1):
                     gram2 = w[i:i + 2]
-                    if FREQ.get(gram2):
+                    if self.FREQ.get(gram2):
                         yield gram2
             if len(w) > 3:
                 for i in xrange(len(w) - 2):
                     gram3 = w[i:i + 3]
-                    if FREQ.get(gram3):
+                    if self.FREQ.get(gram3):
                         yield gram3
             yield w
 
@@ -362,7 +362,15 @@ class Tokenizer(object):
                 if not line:
                     continue
                 tup = line.split(" ")
-                self.add_word(*tup)
+                freq, tag = None, None
+                if len(tup) == 2:
+                    if tup[1].isdigit():
+                        freq = tup[1]
+                    else:
+                        tag = tup[1]
+                elif len(tup) > 2:
+                    freq, tag = tup[1], tup[2]
+                self.add_word(tup[0], freq, tag)
             except Exception:
                 raise ValueError(
                     'invalid dictionary entry in %s at Line %s: %s' % (
@@ -377,13 +385,10 @@ class Tokenizer(object):
         """
         self.check_initialized()
         word = strdecode(word)
-        if freq is None:
-            freq = self.suggest_freq(word, False)
-        else:
-            freq = int(freq)
+        freq = int(freq) if freq else self.suggest_freq(word, False)
         self.FREQ[word] = freq
         self.total += freq
-        if tag is not None:
+        if tag:
             self.user_word_tag_tab[word] = tag
         for ch in xrange(len(word)):
             wfrag = word[:ch + 1]
@@ -475,7 +480,7 @@ dt = Tokenizer()
 
 # global functions
 
-FREQ = dt.FREQ
+get_FREQ = lambda k, d=None: dt.FREQ.get(k, d)
 add_word = dt.add_word
 calc = dt.calc
 cut = dt.cut
