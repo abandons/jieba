@@ -1,8 +1,8 @@
 from __future__ import absolute_import, unicode_literals
 import re
 import os
-import marshal
 import sys
+import pickle
 from .._compat import *
 
 MIN_FLOAT = -3.14e100
@@ -21,24 +21,9 @@ PrevStatus = {
 
 
 def load_model():
-    _curpath = os.path.normpath(
-        os.path.join(os.getcwd(), os.path.dirname(__file__)))
-
-    start_p = {}
-    abs_path = os.path.join(_curpath, PROB_START_P)
-    with open(abs_path, 'rb') as f:
-        start_p = marshal.load(f)
-
-    trans_p = {}
-    abs_path = os.path.join(_curpath, PROB_TRANS_P)
-    with open(abs_path, 'rb') as f:
-        trans_p = marshal.load(f)
-
-    emit_p = {}
-    abs_path = os.path.join(_curpath, PROB_EMIT_P)
-    with open(abs_path, 'rb') as f:
-        emit_p = marshal.load(f)
-
+    start_p = pickle.load(get_module_res("finalseg", PROB_START_P))
+    trans_p = pickle.load(get_module_res("finalseg", PROB_TRANS_P))
+    emit_p = pickle.load(get_module_res("finalseg", PROB_EMIT_P))
     return start_p, trans_p, emit_p
 
 if sys.platform.startswith("java"):
@@ -89,7 +74,7 @@ def __cut(sentence):
     if nexti < len(sentence):
         yield sentence[nexti:]
 
-re_han = re.compile("([\u4E00-\u9FA5]+)")
+re_han = re.compile("([\u4E00-\u9FD5]+)")
 re_skip = re.compile("(\d+\.\d+|[a-zA-Z0-9]+)")
 
 
